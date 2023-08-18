@@ -29,8 +29,8 @@ export default {
       },
 
       backgroundImage: {
-        app: 'url(./src/assets/img-hero.png)',
-        ticket: 'url(./src/assets/bg-card-ticket.png)',
+        app: 'url("/src/assets/img-hero.png")',
+        ticket: 'url("/src/assets/bg-card-ticket.png")',
       },
     },
   },

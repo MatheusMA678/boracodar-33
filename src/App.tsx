@@ -26,8 +26,6 @@ export default function App() {
   const [user, setUser] = useState('')
   const ticketRef = useRef(null)
 
-  console.log(import.meta.env.VITE_GITHUB_API_KEY)
-
   const [getUser, { data, loading, error }] = useLazyQuery<{
     user: { avatarUrl: string; login: string; name: string }
   }>(GET_USER_INFO_QUERY)
