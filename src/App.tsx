@@ -24,7 +24,7 @@ const GET_USER_INFO_QUERY = gql`
 
 export default function App() {
   const [user, setUser] = useState('')
-  const ticketRef = useRef()
+  const ticketRef = useRef(null)
 
   console.log(import.meta.env.VITE_GITHUB_API_KEY)
 
