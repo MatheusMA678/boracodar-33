@@ -1,8 +1,8 @@
-import { gql, useLazyQuery } from '@apollo/client'
 import { useCallback, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { toPng } from 'html-to-image'
 
+import { api } from './services/api'
 import { Button } from './components/Button'
 import { LoadingIcon } from './assets/LoadingIcon'
 
@@ -12,35 +12,35 @@ import AvatarPlaceholder from './assets/img-avatar.png'
 import Lines from './assets/lines.svg'
 import CheckIcon from './assets/check-icon.svg'
 
-const GET_USER_INFO_QUERY = gql`
-  query GetUserInfoQuery($login: String!) {
-    user(login: $login) {
-      avatarUrl
-      login
-      name
-    }
-  }
-`
+type APIResponse = { avatar_url: string; login: string; name: string }
 
 export default function App() {
   const [user, setUser] = useState('')
+  const [data, setData] = useState<APIResponse | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<unknown | null>(null)
   const ticketRef = useRef(null)
-
-  const [getUser, { data, loading, error }] = useLazyQuery<{
-    user: { avatarUrl: string; login: string; name: string }
-  }>(GET_USER_INFO_QUERY)
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
+      setLoading(true)
 
-      getUser({
-        variables: {
-          login: user,
-        },
-      })
+      async function fetchAPI() {
+        try {
+          const res = await api.get(`/users/${user}`)
+          const data = await res.data
+          setData(data)
+          setLoading(false)
+        } catch (error) {
+          setError(error)
+          setLoading(false)
+        }
+      }
+
+      fetchAPI()
     },
-    [getUser, user],
+    [user],
   )
 
   const convertTicketToPng = () => {
@@ -85,7 +85,7 @@ export default function App() {
               />
             </div>
 
-            {error && (
+            {!!error && (
               <span className="font-title text-lg text-red-500">
                 Usuário inválido. Verifique e tente novamente.
               </span>
@@ -131,7 +131,7 @@ export default function App() {
 
             <div className="flex flex-1 flex-col items-center gap-2 bg-white p-4 text-gray-900">
               <img
-                src={data.user?.avatarUrl ?? AvatarPlaceholder}
+                src={data.avatar_url ?? AvatarPlaceholder}
                 alt="Imagem do Usuário"
                 className="h-32 w-32 rounded-full"
               />
@@ -141,7 +141,7 @@ export default function App() {
                   tripulante
                 </span>
                 <strong className="text-center leading-tight">
-                  {data.user?.name ?? data.user?.login ?? 'Seu nome aqui'}
+                  {data.name ?? data.login ?? 'Seu nome aqui'}
                 </strong>
               </div>
 
